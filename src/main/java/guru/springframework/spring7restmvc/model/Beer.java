@@ -1,5 +1,6 @@
 package guru.springframework.spring7restmvc.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,9 +9,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
+@AllArgsConstructor
 @Data
 public class Beer {
-    private UUID uuid;
+    private UUID id;
     private Integer version;
     private String beerName;
     private BeerStyle beerStyle;
