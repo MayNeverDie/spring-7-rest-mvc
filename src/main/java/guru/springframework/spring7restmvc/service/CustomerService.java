@@ -7,11 +7,11 @@ import java.util.UUID;
 
 public interface CustomerService {
 
-    public List<Customer> listCustomers();
+    List<Customer> listCustomers();
 
-    public Customer getCustomerById(UUID id);
+    Customer getCustomerById(UUID id);
 
-    public Customer saveCustomer(Customer customer);
+    Customer saveCustomer(Customer customer);
 
     void updateCustomerById(UUID customerId, Customer customer);
 
