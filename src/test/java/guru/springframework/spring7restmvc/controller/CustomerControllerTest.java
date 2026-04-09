@@ -5,6 +5,10 @@ import guru.springframework.spring7restmvc.service.CustomerService;
 import guru.springframework.spring7restmvc.service.CustomerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -12,8 +16,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CustomerController.class)
+@ExtendWith(MockitoExtension.class)
 class CustomerControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -28,6 +36,10 @@ class CustomerControllerTest {
     private ObjectMapper objectMapper;
     @MockitoBean
     private CustomerService customerService;
+    @Captor
+    private ArgumentCaptor<UUID> uuidArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<Customer> customerArgumentCaptor;
 
     CustomerServiceImpl customerServiceImpl;
 
@@ -37,13 +49,44 @@ class CustomerControllerTest {
     }
 
     @Test
+    void patchCustomer() throws Exception {
+        Customer customer = customerServiceImpl.listCustomers().getFirst();
+
+        Map<String, Object> customerMap = new HashMap<>();
+        customerMap.put("customerName", "New Name");
+
+        mockMvc.perform(patch("/api/v1/customer/{id}", customer.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customerMap)))
+                .andExpect(status().isNoContent());
+
+        verify(customerService).patchCustomerById(uuidArgumentCaptor.capture(), customerArgumentCaptor.capture());
+        assertThat(uuidArgumentCaptor.getValue()).isEqualTo(customer.getId());
+        assertThat(customerArgumentCaptor.getValue().getCustomerName()).isEqualTo(customerMap.get("customerName"));
+    }
+
+    @Test
+    void deleteCustomer() throws Exception {
+        Customer customer = customerServiceImpl.listCustomers().getFirst();
+
+        mockMvc.perform(delete("/api/v1/customer/{id}", customer.getId())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        verify(customerService).deleteCustomerById(uuidArgumentCaptor.capture());
+
+        assertThat(customer.getId()).isEqualTo(uuidArgumentCaptor.getValue());
+    }
+
+    @Test
     void updateCustomer() throws Exception {
         Customer customer = customerServiceImpl.listCustomers().getFirst();
 
         mockMvc.perform(put("/api/v1/customer/{id}", customer.getId())
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(customer)))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(customer)))
                 .andExpect(status().isNoContent());
 
         verify(customerService).updateCustomerById(any(UUID.class), any(Customer.class));
