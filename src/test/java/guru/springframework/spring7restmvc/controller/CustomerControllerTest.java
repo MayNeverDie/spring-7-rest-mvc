@@ -18,6 +18,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -118,10 +119,16 @@ class CustomerControllerTest {
     }
 
     @Test
-    void findCustomerById() throws Exception {
+    void getCustomerByIdNotFound() throws Exception {
+        mockMvc.perform(get(CustomerController.CUSTOMER_ID_URI, UUID.randomUUID()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCustomerById() throws Exception {
         Customer testCustomer = customerServiceImpl.listCustomers().getFirst();
 
-        when(customerService.getCustomerById(testCustomer.getId())).thenReturn(testCustomer);
+        when(customerService.getCustomerById(testCustomer.getId())).thenReturn(Optional.of(testCustomer));
 
         mockMvc.perform(get(CustomerController.CUSTOMER_ID_URI, testCustomer.getId())
                         .accept(MediaType.APPLICATION_JSON))
