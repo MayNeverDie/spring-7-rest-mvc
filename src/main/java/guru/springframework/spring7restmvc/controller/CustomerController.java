@@ -11,35 +11,37 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping("/api/v1/customer")
 @RequiredArgsConstructor
 @RestController
 public class CustomerController {
 
+    public static final String CUSTOMER_URI = "/api/v1/customer";
+    public static final String CUSTOMER_ID_URI = CUSTOMER_URI + "/{customerId}";
+
     private final CustomerService customerService;
 
-    @PatchMapping("/{customerId}")
+    @PatchMapping(CUSTOMER_ID_URI)
     public ResponseEntity<Void> patchById(@PathVariable("customerId") UUID customerId, @RequestBody Customer customer) {
         customerService.patchCustomerById(customerId, customer);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping("/{customerId}")
+    @DeleteMapping(CUSTOMER_ID_URI)
     public ResponseEntity<Void> deleteById(@PathVariable("customerId") UUID customerId) {
         customerService.deleteCustomerById(customerId);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/{customerId}")
+    @PutMapping(CUSTOMER_ID_URI)
     public ResponseEntity<Void> updateById(@PathVariable("customerId") UUID customerId, @RequestBody Customer customer) {
         customerService.updateCustomerById(customerId, customer);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping
+    @PostMapping(CUSTOMER_URI)
     public ResponseEntity<Void> handlePost(@RequestBody Customer customer) {
         Customer savedCustomer = customerService.saveCustomer(customer);
 
@@ -49,12 +51,12 @@ public class CustomerController {
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping(CUSTOMER_URI)
     public List<Customer> listCustomers () {
         return customerService.listCustomers();
     }
 
-    @RequestMapping(value = "/{customerId}", method = RequestMethod.GET)
+    @GetMapping(CUSTOMER_ID_URI)
     public Customer findCustomerById (@PathVariable("customerId") UUID id) {
         return customerService.getCustomerById(id);
     }
