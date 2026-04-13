@@ -21,7 +21,7 @@ public class Customer {
     private UUID id;
     @Version
     private Integer version;
-    private String customerName;
+    private String name;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 }
