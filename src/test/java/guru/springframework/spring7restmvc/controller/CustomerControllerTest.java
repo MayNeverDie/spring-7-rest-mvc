@@ -1,6 +1,6 @@
 package guru.springframework.spring7restmvc.controller;
 
-import guru.springframework.spring7restmvc.model.CustomerDTO;
+import guru.springframework.spring7restmvc.model.CustomerDto;
 import guru.springframework.spring7restmvc.service.CustomerService;
 import guru.springframework.spring7restmvc.service.CustomerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +40,7 @@ class CustomerControllerTest {
     @Captor
     private ArgumentCaptor<UUID> uuidArgumentCaptor;
     @Captor
-    private ArgumentCaptor<CustomerDTO> customerArgumentCaptor;
+    private ArgumentCaptor<CustomerDto> customerArgumentCaptor;
 
     CustomerServiceImpl customerServiceImpl;
 
@@ -51,7 +51,7 @@ class CustomerControllerTest {
 
     @Test
     void patchCustomer() throws Exception {
-        CustomerDTO customerDTO = customerServiceImpl.listCustomers().getFirst();
+        CustomerDto customerDTO = customerServiceImpl.listCustomers().getFirst();
 
         Map<String, Object> customerMap = new HashMap<>();
         customerMap.put("customerName", "New Name");
@@ -64,12 +64,12 @@ class CustomerControllerTest {
 
         verify(customerService).patchCustomerById(uuidArgumentCaptor.capture(), customerArgumentCaptor.capture());
         assertThat(uuidArgumentCaptor.getValue()).isEqualTo(customerDTO.getId());
-        assertThat(customerArgumentCaptor.getValue().getCustomerName()).isEqualTo(customerMap.get("customerName"));
+        assertThat(customerArgumentCaptor.getValue().getName()).isEqualTo(customerMap.get("customerName"));
     }
 
     @Test
     void deleteCustomer() throws Exception {
-        CustomerDTO customerDTO = customerServiceImpl.listCustomers().getFirst();
+        CustomerDto customerDTO = customerServiceImpl.listCustomers().getFirst();
 
         mockMvc.perform(delete(CustomerController.CUSTOMER_ID_URI, customerDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -82,7 +82,7 @@ class CustomerControllerTest {
 
     @Test
     void updateCustomer() throws Exception {
-        CustomerDTO customerDTO = customerServiceImpl.listCustomers().getFirst();
+        CustomerDto customerDTO = customerServiceImpl.listCustomers().getFirst();
 
         mockMvc.perform(put(CustomerController.CUSTOMER_ID_URI, customerDTO.getId())
                         .accept(MediaType.APPLICATION_JSON)
@@ -90,16 +90,16 @@ class CustomerControllerTest {
                         .content(objectMapper.writeValueAsString(customerDTO)))
                 .andExpect(status().isNoContent());
 
-        verify(customerService).updateCustomerById(any(UUID.class), any(CustomerDTO.class));
+        verify(customerService).updateCustomerById(any(UUID.class), any(CustomerDto.class));
     }
 
     @Test
     void createCustomer() throws Exception {
-        CustomerDTO customerDTO = customerServiceImpl.listCustomers().getFirst();
+        CustomerDto customerDTO = customerServiceImpl.listCustomers().getFirst();
         customerDTO.setId(null);
         customerDTO.setVersion(null);
 
-        when(customerService.saveCustomer(any(CustomerDTO.class))).thenReturn(customerServiceImpl.listCustomers().get(1));
+        when(customerService.saveCustomer(any(CustomerDto.class))).thenReturn(customerServiceImpl.listCustomers().get(1));
         mockMvc.perform(post(CustomerController.CUSTOMER_URI)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -126,15 +126,15 @@ class CustomerControllerTest {
 
     @Test
     void getCustomerById() throws Exception {
-        CustomerDTO testCustomerDTO = customerServiceImpl.listCustomers().getFirst();
+        CustomerDto testCustomerDto = customerServiceImpl.listCustomers().getFirst();
 
-        when(customerService.getCustomerById(testCustomerDTO.getId())).thenReturn(Optional.of(testCustomerDTO));
+        when(customerService.getCustomerById(testCustomerDto.getId())).thenReturn(Optional.of(testCustomerDto));
 
-        mockMvc.perform(get(CustomerController.CUSTOMER_ID_URI, testCustomerDTO.getId())
+        mockMvc.perform(get(CustomerController.CUSTOMER_ID_URI, testCustomerDto.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(testCustomerDTO.getId().toString()))
-                .andExpect(jsonPath("$.customerName").value(testCustomerDTO.getCustomerName()));
+                .andExpect(jsonPath("$.id").value(testCustomerDto.getId().toString()))
+                .andExpect(jsonPath("$.customerName").value(testCustomerDto.getName()));
     }
 }
