@@ -73,6 +73,33 @@ public class BeerControllerIntegrationTest {
         assertThat(updatedBeer.getBeerName()).isEqualTo(updatedName);
     }
 
+    @Test
+    public void patchByIdNotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            beerController.patchById(UUID.randomUUID(), BeerDto.builder().build());
+        });
+    }
+
+    @Rollback
+    @Transactional
+    @Test
+    public void patchExistingBeer() {
+        Beer beer = beerRepository.findAll().getFirst();
+        BeerDto beerDto = beerMapper.beerToBeerDto(beer);
+
+        final String updatedName = "UPDATED";
+        beerDto.setId(null);
+        beerDto.setVersion(null);
+        beerDto.setBeerName(updatedName);
+        beerDto.setUpc("");
+
+        ResponseEntity<Void> responseEntity = beerController.patchById(beer.getId(), beerDto);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+
+        Beer updatedBeer = beerRepository.findById(beer.getId()).get();
+        assertThat(updatedBeer.getBeerName()).isEqualTo(updatedName);
+        assertThat(updatedBeer.getUpc()).isEqualTo(beer.getUpc());
+    }
 
     @Rollback
     @Transactional

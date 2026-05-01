@@ -25,7 +25,7 @@ public class BeerController {
 
     @PatchMapping(BEER_ID_URI)
     public ResponseEntity<Void> patchById(@PathVariable("beerId") UUID beerId, @RequestBody BeerDto beerDTO) {
-        beerService.patchBeerById(beerId, beerDTO);
+        beerService.patchBeerById(beerId, beerDTO).orElseThrow(NotFoundException::new);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
