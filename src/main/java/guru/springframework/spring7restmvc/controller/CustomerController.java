@@ -22,7 +22,7 @@ public class CustomerController {
 
     @PatchMapping(CUSTOMER_ID_URI)
     public ResponseEntity<Void> patchById(@PathVariable("customerId") UUID customerId, @RequestBody CustomerDto customerDTO) {
-        customerService.patchCustomerById(customerId, customerDTO);
+        customerService.patchCustomerById(customerId, customerDTO).orElseThrow(NotFoundException::new);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
