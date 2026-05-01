@@ -29,14 +29,15 @@ public class CustomerController {
 
     @DeleteMapping(CUSTOMER_ID_URI)
     public ResponseEntity<Void> deleteById(@PathVariable("customerId") UUID customerId) {
-        customerService.deleteCustomerById(customerId);
-
+        if (!customerService.deleteCustomerById(customerId)) {
+            throw new NotFoundException();
+        }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping(CUSTOMER_ID_URI)
     public ResponseEntity<Void> updateById(@PathVariable("customerId") UUID customerId, @RequestBody CustomerDto customerDTO) {
-        customerService.updateCustomerById(customerId, customerDTO);
+        customerService.updateCustomerById(customerId, customerDTO).orElseThrow(NotFoundException::new);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

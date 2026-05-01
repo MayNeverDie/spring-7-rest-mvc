@@ -54,7 +54,10 @@ class CustomerControllerTest {
         CustomerDto customerDTO = customerServiceImpl.listCustomers().getFirst();
 
         Map<String, Object> customerMap = new HashMap<>();
-        customerMap.put("customerName", "New Name");
+        customerMap.put("name", "New Name");
+
+        /*when(customerService.updateCustomerById(any(UUID.class), any(CustomerDto.class)))
+                .thenReturn(Optional.of(customerDTO));*/
 
         mockMvc.perform(patch(CustomerController.CUSTOMER_ID_URI, customerDTO.getId())
                         .accept(MediaType.APPLICATION_JSON)
@@ -64,12 +67,14 @@ class CustomerControllerTest {
 
         verify(customerService).patchCustomerById(uuidArgumentCaptor.capture(), customerArgumentCaptor.capture());
         assertThat(uuidArgumentCaptor.getValue()).isEqualTo(customerDTO.getId());
-        assertThat(customerArgumentCaptor.getValue().getName()).isEqualTo(customerMap.get("customerName"));
+        assertThat(customerArgumentCaptor.getValue().getName()).isEqualTo(customerMap.get("name"));
     }
 
     @Test
     void deleteCustomer() throws Exception {
         CustomerDto customerDTO = customerServiceImpl.listCustomers().getFirst();
+
+        when(customerService.deleteCustomerById(any())).thenReturn(true);
 
         mockMvc.perform(delete(CustomerController.CUSTOMER_ID_URI, customerDTO.getId())
                         .contentType(MediaType.APPLICATION_JSON))
@@ -83,6 +88,9 @@ class CustomerControllerTest {
     @Test
     void updateCustomer() throws Exception {
         CustomerDto customerDTO = customerServiceImpl.listCustomers().getFirst();
+
+        when(customerService.updateCustomerById(any(UUID.class), any(CustomerDto.class)))
+                .thenReturn(Optional.of(customerDTO));
 
         mockMvc.perform(put(CustomerController.CUSTOMER_ID_URI, customerDTO.getId())
                         .accept(MediaType.APPLICATION_JSON)
@@ -135,6 +143,6 @@ class CustomerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(testCustomerDto.getId().toString()))
-                .andExpect(jsonPath("$.customerName").value(testCustomerDto.getName()));
+                .andExpect(jsonPath("$.name").value(testCustomerDto.getName()));
     }
 }

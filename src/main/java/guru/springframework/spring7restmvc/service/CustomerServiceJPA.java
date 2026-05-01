@@ -1,5 +1,6 @@
 package guru.springframework.spring7restmvc.service;
 
+import guru.springframework.spring7restmvc.entities.Customer;
 import guru.springframework.spring7restmvc.mappers.CustomerMapper;
 import guru.springframework.spring7restmvc.model.CustomerDto;
 import guru.springframework.spring7restmvc.repositories.CustomerRepository;
@@ -36,17 +37,26 @@ public class CustomerServiceJPA implements CustomerService {
 
     @Override
     public CustomerDto saveCustomer(CustomerDto customerDTO) {
-        return null;
+        Customer newCustomer = customerRepository.save(customerMapper.customerDtoToCustomer(customerDTO));
+        return customerMapper.customerToCustomerDto(newCustomer);
     }
 
     @Override
-    public void updateCustomerById(UUID customerId, CustomerDto customerDTO) {
-
+    public Optional<CustomerDto> updateCustomerById(UUID customerId, CustomerDto customerDTO) {
+        return customerRepository.findById(customerId).map(foundCustomer -> {
+            foundCustomer.setName(customerDTO.getName());
+            foundCustomer.setLastModifiedDate(customerDTO.getLastModifiedDate());
+            return customerMapper.customerToCustomerDto(customerRepository.save(foundCustomer));
+        });
     }
 
     @Override
-    public void deleteCustomerById(UUID customerId) {
-
+    public boolean deleteCustomerById(UUID customerId) {
+        if(customerRepository.existsById(customerId)) {
+            customerRepository.deleteById(customerId);
+            return true;
+        }
+        return false;
     }
 
     @Override
