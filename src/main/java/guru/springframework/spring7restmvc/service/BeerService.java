@@ -14,9 +14,9 @@ public interface BeerService {
 
     BeerDto saveBeer(BeerDto beerDTO);
 
-    void updateBeerById(UUID beerId, BeerDto beerDTO);
+    Optional<BeerDto> updateBeerById(UUID beerId, BeerDto beerDTO);
 
-    void deleteBeerById(UUID beerId);
+    boolean deleteBeerById(UUID beerId);
 
     void patchBeerById(UUID beerId, BeerDto beerDTO);
 }

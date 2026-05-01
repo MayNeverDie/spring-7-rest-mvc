@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,14 +32,16 @@ public class BeerController {
 
     @DeleteMapping(BEER_ID_URI)
     public ResponseEntity<Void> deleteBeerById(@PathVariable("beerId") UUID beerId) {
-        beerService.deleteBeerById(beerId);
+        if (!beerService.deleteBeerById(beerId)){
+            throw new NotFoundException();
+        }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping(BEER_ID_URI)
     public ResponseEntity<Void> updateById(@PathVariable("beerId") UUID beerId, @RequestBody BeerDto beerDTO) {
-        beerService.updateBeerById(beerId, beerDTO);
+        beerService.updateBeerById(beerId, beerDTO).orElseThrow(NotFoundException::new);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
